@@ -179,6 +179,11 @@ Allowed work modes:
 | 404 | Document not found |
 | 500 | Internal server error |
 
+## Live Deployment
+
+- API: https://job-application-tracker-de2t.onrender.com
+- Swagger documentation: https://job-application-tracker-de2t.onrender.com/api-docs
+
 ## Security
 
 The `.env` file and MongoDB credentials are excluded from GitHub through `.gitignore`. Never commit database usernames, passwords, or connection strings.
