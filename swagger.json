@@ -1,0 +1,570 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Job Application Tracker API",
+        "version": "1.0.0",
+        "description": "REST API for managing companies and job applications."
+    },
+    "servers": [
+        {
+            "url": "/",
+            "description": "Current server"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Companies",
+            "description": "Company CRUD operations"
+        },
+        {
+            "name": "Applications",
+            "description": "Job application CRUD operations"
+        }
+    ],
+    "paths": {
+        "/companies": {
+            "get": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Get all companies",
+                "operationId": "getAllCompanies",
+                "responses": {
+                    "200": {
+                        "description": "Companies retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Company"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Create a company",
+                "operationId": "createCompany",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompanyInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Company created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Company"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/companies/{id}": {
+            "parameters": [
+                {
+                    "$ref": "#/components/parameters/DocumentId"
+                }
+            ],
+            "get": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Get one company",
+                "operationId": "getCompanyById",
+                "responses": {
+                    "200": {
+                        "description": "Company retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Company"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Update a company",
+                "operationId": "updateCompany",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompanyInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Company updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Company"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Delete a company",
+                "operationId": "deleteCompany",
+                "responses": {
+                    "204": {
+                        "description": "Company deleted successfully"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/applications": {
+            "get": {
+                "tags": [
+                    "Applications"
+                ],
+                "summary": "Get all job applications",
+                "operationId": "getAllApplications",
+                "responses": {
+                    "200": {
+                        "description": "Applications retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Application"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Applications"
+                ],
+                "summary": "Create a job application",
+                "operationId": "createApplication",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplicationInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Application created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Application"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/applications/{id}": {
+            "parameters": [
+                {
+                    "$ref": "#/components/parameters/DocumentId"
+                }
+            ],
+            "get": {
+                "tags": [
+                    "Applications"
+                ],
+                "summary": "Get one job application",
+                "operationId": "getApplicationById",
+                "responses": {
+                    "200": {
+                        "description": "Application retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Application"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Applications"
+                ],
+                "summary": "Update a job application",
+                "operationId": "updateApplication",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplicationInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Application updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Application"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Applications"
+                ],
+                "summary": "Delete a job application",
+                "operationId": "deleteApplication",
+                "responses": {
+                    "204": {
+                        "description": "Application deleted successfully"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "parameters": {
+            "DocumentId": {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "description": "MongoDB document ID",
+                "schema": {
+                    "type": "string",
+                    "pattern": "^[a-fA-F0-9]{24}$"
+                }
+            }
+        },
+        "responses": {
+            "BadRequest": {
+                "description": "Invalid ID or request data",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            },
+            "NotFound": {
+                "description": "Document not found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            },
+            "ServerError": {
+                "description": "Internal server error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "schemas": {
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "Unable to process the request"
+                    }
+                }
+            },
+            "CompanyInput": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "website",
+                    "industry",
+                    "location",
+                    "contactName",
+                    "contactEmail"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Acme Technology"
+                    },
+                    "website": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://www.example.com"
+                    },
+                    "industry": {
+                        "type": "string",
+                        "example": "Software"
+                    },
+                    "location": {
+                        "type": "string",
+                        "example": "Boise, Idaho"
+                    },
+                    "contactName": {
+                        "type": "string",
+                        "example": "Jordan Smith"
+                    },
+                    "contactEmail": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "jordan@example.com"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "example": "Met at a university career fair."
+                    }
+                }
+            },
+            "Company": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/CompanyInput"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "_id": {
+                                "type": "string",
+                                "example": "68cb1234567890abcdef1234"
+                            },
+                            "createdAt": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "updatedAt": {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        }
+                    }
+                ]
+            },
+            "ApplicationInput": {
+                "type": "object",
+                "required": [
+                    "position",
+                    "companyId",
+                    "appliedDate",
+                    "status",
+                    "workMode",
+                    "location",
+                    "salaryRange",
+                    "jobUrl",
+                    "description",
+                    "technologies"
+                ],
+                "properties": {
+                    "position": {
+                        "type": "string",
+                        "example": "Junior Web Developer"
+                    },
+                    "companyId": {
+                        "type": "string",
+                        "example": "68cb1234567890abcdef1234"
+                    },
+                    "appliedDate": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-09-16"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "saved",
+                            "applied",
+                            "interviewing",
+                            "offer",
+                            "rejected",
+                            "withdrawn"
+                        ],
+                        "example": "applied"
+                    },
+                    "workMode": {
+                        "type": "string",
+                        "enum": [
+                            "remote",
+                            "hybrid",
+                            "onsite"
+                        ],
+                        "example": "hybrid"
+                    },
+                    "location": {
+                        "type": "string",
+                        "example": "Boise, Idaho"
+                    },
+                    "salaryRange": {
+                        "type": "string",
+                        "example": "$60,000-$75,000"
+                    },
+                    "jobUrl": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://www.example.com/jobs/123"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Build and maintain web applications."
+                    },
+                    "technologies": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "JavaScript",
+                            "Node.js",
+                            "MongoDB"
+                        ]
+                    },
+                    "notes": {
+                        "type": "string",
+                        "example": "Follow up with the recruiter next week."
+                    }
+                }
+            },
+            "Application": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ApplicationInput"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "_id": {
+                                "type": "string",
+                                "example": "68cb1234567890abcdef5678"
+                            },
+                            "createdAt": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "updatedAt": {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
