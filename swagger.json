@@ -13,6 +13,10 @@
     ],
     "tags": [
         {
+            "name": "Authentication",
+            "description": "GitHub OAuth login, session status, and logout"
+        },
+        {
             "name": "Companies",
             "description": "Company CRUD operations"
         },
@@ -22,6 +26,71 @@
         }
     ],
     "paths": {
+        "/auth/github": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Log in with GitHub",
+                "description": "Open this route in the browser to begin GitHub OAuth. After a successful login, the user returns to Swagger with an authenticated session cookie.",
+                "operationId": "loginWithGitHub",
+                "responses": {
+                    "302": {
+                        "description": "Redirect to GitHub for authentication"
+                    }
+                }
+            }
+        },
+        "/auth/status": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Check authentication status",
+                "operationId": "getAuthenticationStatus",
+                "responses": {
+                    "200": {
+                        "description": "Current authentication status",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthStatus"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Log out and return to Swagger",
+                "operationId": "logoutInBrowser",
+                "responses": {
+                    "302": {
+                        "description": "Session destroyed and redirected to Swagger"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Log out and return JSON",
+                "operationId": "logout",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
         "/companies": {
             "get": {
                 "tags": [
@@ -54,6 +123,11 @@
                 ],
                 "summary": "Create a company",
                 "operationId": "createCompany",
+                "security": [
+                    {
+                        "sessionCookie": []
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -77,6 +151,9 @@
                     },
                     "400": {
                         "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
                     },
                     "500": {
                         "$ref": "#/components/responses/ServerError"
@@ -124,6 +201,11 @@
                 ],
                 "summary": "Update a company",
                 "operationId": "updateCompany",
+                "security": [
+                    {
+                        "sessionCookie": []
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -148,6 +230,9 @@
                     "400": {
                         "$ref": "#/components/responses/BadRequest"
                     },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
                     "404": {
                         "$ref": "#/components/responses/NotFound"
                     },
@@ -162,12 +247,20 @@
                 ],
                 "summary": "Delete a company",
                 "operationId": "deleteCompany",
+                "security": [
+                    {
+                        "sessionCookie": []
+                    }
+                ],
                 "responses": {
                     "204": {
                         "description": "Company deleted successfully"
                     },
                     "400": {
                         "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
                     },
                     "404": {
                         "$ref": "#/components/responses/NotFound"
@@ -210,6 +303,11 @@
                 ],
                 "summary": "Create a job application",
                 "operationId": "createApplication",
+                "security": [
+                    {
+                        "sessionCookie": []
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -233,6 +331,9 @@
                     },
                     "400": {
                         "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
                     },
                     "500": {
                         "$ref": "#/components/responses/ServerError"
@@ -280,6 +381,11 @@
                 ],
                 "summary": "Update a job application",
                 "operationId": "updateApplication",
+                "security": [
+                    {
+                        "sessionCookie": []
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -304,6 +410,9 @@
                     "400": {
                         "$ref": "#/components/responses/BadRequest"
                     },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
                     "404": {
                         "$ref": "#/components/responses/NotFound"
                     },
@@ -318,12 +427,20 @@
                 ],
                 "summary": "Delete a job application",
                 "operationId": "deleteApplication",
+                "security": [
+                    {
+                        "sessionCookie": []
+                    }
+                ],
                 "responses": {
                     "204": {
                         "description": "Application deleted successfully"
                     },
                     "400": {
                         "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
                     },
                     "404": {
                         "$ref": "#/components/responses/NotFound"
@@ -336,6 +453,14 @@
         }
     },
     "components": {
+        "securitySchemes": {
+            "sessionCookie": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "job-tracker.sid",
+                "description": "Session cookie created after signing in through GET /auth/github. Swagger sends this same-origin cookie automatically."
+            }
+        },
         "parameters": {
             "DocumentId": {
                 "name": "id",
@@ -351,6 +476,16 @@
         "responses": {
             "BadRequest": {
                 "description": "Invalid ID or request data",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            },
+            "Unauthorized": {
+                "description": "GitHub authentication is required",
                 "content": {
                     "application/json": {
                         "schema": {
@@ -381,6 +516,46 @@
             }
         },
         "schemas": {
+            "AuthStatus": {
+                "type": "object",
+                "required": [
+                    "authenticated"
+                ],
+                "properties": {
+                    "authenticated": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "login": {
+                        "type": "string",
+                        "example": "/auth/github"
+                    },
+                    "user": {
+                        "type": "object",
+                        "nullable": true,
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "username": {
+                                "type": "string"
+                            },
+                            "displayName": {
+                                "type": "string"
+                            },
+                            "profileUrl": {
+                                "type": "string",
+                                "format": "uri"
+                            },
+                            "avatarUrl": {
+                                "type": "string",
+                                "format": "uri",
+                                "nullable": true
+                            }
+                        }
+                    }
+                }
+            },
             "Error": {
                 "type": "object",
                 "properties": {
