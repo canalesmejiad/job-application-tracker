@@ -1,6 +1,6 @@
 # Job Application Tracker API
 
-A REST API for tracking companies and job applications. This project was created with Node.js, Express, and MongoDB and includes complete CRUD operations, data validation, error handling, and interactive Swagger documentation.
+A REST API for tracking companies and job applications. This project was created with Node.js, Express, MongoDB, and GitHub OAuth and includes complete CRUD operations, data validation, authenticated write operations, error handling, and interactive Swagger documentation.
 
 ## Features
 
@@ -11,6 +11,8 @@ A REST API for tracking companies and job applications. This project was created
 - Proper HTTP status codes.
 - Error handling with `try/catch`.
 - Interactive Swagger documentation.
+- GitHub OAuth login and logout with persistent MongoDB sessions.
+- Authentication protection for POST, PUT, and DELETE operations.
 - Secure environment-variable configuration.
 
 ## Technologies
@@ -22,6 +24,10 @@ A REST API for tracking companies and job applications. This project was created
 - Swagger UI
 - dotenv
 - CORS
+- Passport
+- GitHub OAuth
+- Express Session
+- Connect Mongo
 - nodemon
 
 ## Collections
@@ -74,6 +80,10 @@ npm install
 ```env
 MONGODB_URI=your_mongodb_connection_string
 DATABASE_NAME=job_application_tracker
+GITHUB_CLIENT_ID=your_github_oauth_client_id
+GITHUB_CLIENT_SECRET=your_github_oauth_client_secret
+GITHUB_CALLBACK_URL=http://localhost:3000/auth/github/callback
+SESSION_SECRET=replace_with_a_long_random_value
 ```
 
 4. Start the development server:
@@ -114,6 +124,18 @@ After deployment, replace `localhost:3000` with the Render domain.
 
 ## API Endpoints
 
+### Authentication
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| GET | `/auth/github` | Start GitHub OAuth login |
+| GET | `/auth/github/callback` | Complete the OAuth flow |
+| GET | `/auth/status` | Check the current session |
+| GET | `/auth/logout` | Log out and return to Swagger |
+| POST | `/auth/logout` | Log out and return JSON |
+
+After logging in through `/auth/github`, the browser receives an HTTP-only session cookie. Swagger requests on the same deployment automatically include this cookie.
+
 ### Companies
 
 | Method | Endpoint | Description |
@@ -133,6 +155,8 @@ After deployment, replace `localhost:3000` with the Render domain.
 | POST | `/applications` | Create a job application |
 | PUT | `/applications/:id` | Update a job application |
 | DELETE | `/applications/:id` | Delete a job application |
+
+GET operations are public. POST, PUT, and DELETE operations require an authenticated GitHub session and return HTTP `401` when the user is not logged in.
 
 ## Validation
 
@@ -176,6 +200,7 @@ Allowed work modes:
 | 201 | Document created successfully |
 | 204 | Document deleted successfully |
 | 400 | Invalid ID or request data |
+| 401 | Authentication required |
 | 404 | Document not found |
 | 500 | Internal server error |
 
@@ -186,11 +211,9 @@ Allowed work modes:
 
 ## Security
 
-The `.env` file and MongoDB credentials are excluded from GitHub through `.gitignore`. Never commit database usernames, passwords, or connection strings.
+The `.env` file, MongoDB credentials, GitHub client secret, and session secret are excluded from GitHub through `.gitignore`. Never commit database usernames, passwords, OAuth secrets, or connection strings.
 
-## Future Development
-
-OAuth authentication and user management will be added during the next phase of the project.
+Authentication uses GitHub OAuth. Sessions are stored in MongoDB and use an HTTP-only cookie. Production cookies are marked `Secure` and use `SameSite=Lax`.
 
 ## Author
 
