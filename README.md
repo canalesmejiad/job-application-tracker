@@ -1,17 +1,19 @@
 # Job Application Tracker API
 
-A REST API for tracking companies and job applications. This project was created with Node.js, Express, and MongoDB and includes complete CRUD operations, data validation, error handling, and interactive Swagger documentation.
+A REST API for tracking companies, job applications, professional contacts, and interviews. Built with Node.js, Express, MongoDB, and GitHub OAuth.
 
 ## Features
 
-- Manage companies and job applications.
-- GET, POST, PUT, and DELETE operations for two MongoDB collections.
-- Validation for POST and PUT requests.
+- GET, POST, PUT, and DELETE operations for four collections.
+- Data validation for POST and PUT requests.
 - MongoDB ObjectId validation.
-- Proper HTTP status codes.
-- Error handling with `try/catch`.
+- Validation of relationships between collections.
+- GitHub OAuth login and logout.
+- Persistent sessions stored in MongoDB.
+- Authentication required for contact and interview write operations.
+- Error handling, including malformed JSON requests.
 - Interactive Swagger documentation.
-- Secure environment-variable configuration.
+- Eight unit tests covering GET controllers across all four collections.
 
 ## Technologies
 
@@ -19,178 +21,278 @@ A REST API for tracking companies and job applications. This project was created
 - Express
 - MongoDB Atlas
 - MongoDB Node.js Driver
+- Passport and passport-github2
+- express-session
+- connect-mongo
 - Swagger UI
 - dotenv
 - CORS
 - nodemon
+- Node.js test runner and assert
 
 ## Collections
 
 ### Companies
 
-A company document contains:
+Fields:
 
-- `name`
-- `website`
-- `industry`
-- `location`
-- `contactName`
-- `contactEmail`
-- `notes`
-- `createdAt`
-- `updatedAt`
+`name`, `website`, `industry`, `location`, `contactName`,
+`contactEmail`, `notes`, `createdAt`, and `updatedAt`.
 
 ### Applications
 
-A job application document contains:
+Fields:
 
-- `position`
-- `companyId`
-- `appliedDate`
-- `status`
-- `workMode`
-- `location`
-- `salaryRange`
-- `jobUrl`
-- `description`
-- `technologies`
-- `notes`
-- `createdAt`
-- `updatedAt`
+`position`, `companyId`, `appliedDate`, `status`, `workMode`,
+`location`, `salaryRange`, `jobUrl`, `description`, `technologies`,
+`notes`, `createdAt`, and `updatedAt`.
 
-The `companyId` field connects an application to an existing company.
+`companyId` references an existing company.
+
+### Contacts
+
+Fields:
+
+`name`, `email`, `phone`, `role`, `companyId`, `notes`,
+`createdAt`, and `updatedAt`.
+
+`companyId` references an existing company.
+
+### Interviews
+
+Fields:
+
+`applicationId`, `scheduledAt`, `type`, `interviewer`, `location`,
+`status`, `notes`, `createdAt`, and `updatedAt`.
+
+`applicationId` references an existing job application.
+
+MongoDB also assigns an `_id` to each document. A separate
+`sessions` collection stores login sessions.
 
 ## Installation
 
-1. Clone the repository.
-2. Install the dependencies:
+1. Clone the repository and enter the project folder.
+2. Use Node.js 24, the version used for local testing.
+3. Install dependencies:
 
 ```bash
 npm install
 ```
 
-3. Create a `.env` file based on `.env.example`:
+4. Copy the environment template:
+
+```bash
+cp .env.example .env
+```
+
+5. Fill in your configuration:
 
 ```env
 MONGODB_URI=your_mongodb_connection_string
 DATABASE_NAME=job_application_tracker
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+GITHUB_CALLBACK_URL=http://localhost:3000/auth/github/callback
+SESSION_SECRET=your_long_random_session_secret
 ```
 
-4. Start the development server:
+6. Register a GitHub OAuth App with:
+
+- Homepage URL: `http://localhost:3000`
+- Redirect URI: `http://localhost:3000/auth/github/callback`
+
+7. Generate a session secret:
+
+```bash
+node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+```
+
+Copy the generated value into `SESSION_SECRET` in `.env`.
+
+8. Start the development server:
 
 ```bash
 npm run dev
 ```
 
-The local API will run at:
-
-```text
-http://localhost:3000
-```
+The local API runs at `http://localhost:3000` unless `PORT`
+is configured with a different value.
 
 ## Scripts
 
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Run the development server with nodemon |
+| `npm start` | Run the server with Node.js |
+| `npm test` | Run all unit tests |
+
+## Unit Tests
+
+Run:
+
 ```bash
-npm run dev
+npm test
 ```
 
-Runs the application with nodemon for development.
+The eight tests cover two GET controller behaviors for each collection:
 
-```bash
-npm start
-```
+- List requests return status 200 and the expected data.
+- Requests for a nonexistent document return status 404.
 
-Runs the application with Node.js for production.
+Tests use simulated MongoDB responses and Express response objects.
+They do not require a running server, database connection, or OAuth credentials.
 
 ## API Documentation
 
-Interactive Swagger documentation is available at:
+Local Swagger documentation:
 
-```text
 http://localhost:3000/api-docs
-```
 
-After deployment, replace `localhost:3000` with the Render domain.
+Swagger documents all four collections and the authentication routes.
+Protected operations are marked as requiring a session cookie.
 
 ## API Endpoints
 
-### Companies
+### Authentication
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
-| GET | `/companies` | Get all companies |
-| GET | `/companies/:id` | Get one company |
-| POST | `/companies` | Create a company |
-| PUT | `/companies/:id` | Update a company |
-| DELETE | `/companies/:id` | Delete a company |
+| GET | `/auth/github` | Start GitHub login |
+| GET | `/auth/github/callback` | Receive GitHub's authentication response |
+| GET | `/auth/status` | Check the current login session |
+| GET | `/auth/failure` | Report failed authentication |
+| POST | `/auth/logout` | Log out and destroy the session |
 
-### Applications
+Open `/auth/github` in a browser to complete login.
+After successful login, the browser returns to `/api-docs`.
 
-| Method | Endpoint | Description |
+Swagger requests on the same origin use the browser's session cookie.
+A terminal request with curl does not automatically share that cookie.
+
+### Collection Routes
+
+| Collection | List / Create | Get / Update / Delete |
 | --- | --- | --- |
-| GET | `/applications` | Get all job applications |
-| GET | `/applications/:id` | Get one job application |
-| POST | `/applications` | Create a job application |
-| PUT | `/applications/:id` | Update a job application |
-| DELETE | `/applications/:id` | Delete a job application |
+| Companies | `/companies` | `/companies/:id` |
+| Applications | `/applications` | `/applications/:id` |
+| Contacts | `/contacts` | `/contacts/:id` |
+| Interviews | `/interviews` | `/interviews/:id` |
+
+For each collection:
+
+- GET on the collection path lists documents.
+- POST on the collection path creates a document.
+- GET on the ID path retrieves one document.
+- PUT on the ID path updates a document.
+- DELETE on the ID path deletes a document.
+
+All collection GET routes are public.
+
+POST, PUT, and DELETE for contacts and interviews require
+an authenticated GitHub session. Requests without a session return 401.
+
+Company and application write routes currently remain public.
 
 ## Validation
 
-Company POST and PUT requests validate:
+POST and PUT require all mandatory fields for the corresponding collection.
+
+### Companies
 
 - Required text fields.
-- Valid email addresses.
-- Valid HTTP or HTTPS website URLs.
+- Valid contact email.
+- Valid HTTP or HTTPS website URL.
 
-Application POST and PUT requests validate:
+### Applications
 
 - Required text fields.
-- Valid MongoDB company IDs.
-- An existing company relationship.
-- Valid dates.
-- Allowed application statuses.
-- Allowed work modes.
-- Valid HTTP or HTTPS job URLs.
-- A non-empty technologies array.
+- Valid company ID referencing an existing company.
+- Parseable application date.
+- Allowed status and work mode.
+- Valid HTTP or HTTPS job URL.
+- Non-empty array of technology names.
 
-Allowed application statuses:
+Application statuses:
 
-- `saved`
-- `applied`
-- `interviewing`
-- `offer`
-- `rejected`
-- `withdrawn`
+`saved`, `applied`, `interviewing`, `offer`, `rejected`, `withdrawn`.
 
-Allowed work modes:
+Work modes:
 
-- `remote`
-- `hybrid`
-- `onsite`
+`remote`, `hybrid`, `onsite`.
+
+### Contacts
+
+- Required name, email, phone, role, and company ID.
+- Valid email.
+- Valid company ID referencing an existing company.
+- Optional notes must be a string.
+
+### Interviews
+
+- Required application ID, scheduled date, type, interviewer,
+  location, and status.
+- Valid application ID referencing an existing application.
+- ISO date-time with seconds and timezone, such as
+  `2026-10-20T15:00:00Z`.
+- Allowed interview type and status.
+- Optional notes must be a string.
+
+Interview types:
+
+`phone`, `video`, `onsite`.
+
+Interview statuses:
+
+`scheduled`, `completed`, `cancelled`.
 
 ## HTTP Status Codes
 
 | Status | Meaning |
 | --- | --- |
-| 200 | Request completed successfully |
-| 201 | Document created successfully |
-| 204 | Document deleted successfully |
-| 400 | Invalid ID or request data |
+| 200 | Successful request |
+| 201 | Document created |
+| 204 | Document deleted; no response body |
+| 400 | Invalid ID, request data, or malformed JSON |
+| 401 | Authentication required or authentication failed |
 | 404 | Document not found |
 | 500 | Internal server error |
 
-## Live Deployment
+## Render Deployment
+
+Existing deployment URLs:
 
 - API: https://job-application-tracker-de2t.onrender.com
-- Swagger documentation: https://job-application-tracker-de2t.onrender.com/api-docs
+- Swagger: https://job-application-tracker-de2t.onrender.com/api-docs
+
+The latest local changes still need to be deployed and verified on Render.
+
+Configure these environment variables in Render:
+
+- `MONGODB_URI`
+- `DATABASE_NAME`
+- `GITHUB_CLIENT_ID`
+- `GITHUB_CLIENT_SECRET`
+- `GITHUB_CALLBACK_URL`
+- `SESSION_SECRET`
+- `NODE_ENV=production`
+
+For production, use a GitHub OAuth App configured for the Render domain.
+Its Redirect URI must match:
+
+https://job-application-tracker-de2t.onrender.com/auth/github/callback
+
+Use that same URL for `GITHUB_CALLBACK_URL` in Render.
 
 ## Security
 
-The `.env` file and MongoDB credentials are excluded from GitHub through `.gitignore`. Never commit database usernames, passwords, or connection strings.
+Keep real credentials in `.env` locally and in Render's environment settings.
+The `.env` file is excluded from Git through `.gitignore`.
 
-## Future Development
+Commit `.env.example` with placeholder values only.
 
-OAuth authentication and user management will be added during the next phase of the project.
+Session cookies are HTTP-only, use SameSite=Lax, and are marked Secure
+when `NODE_ENV=production` or `RENDER=true`.
 
 ## Author
 
