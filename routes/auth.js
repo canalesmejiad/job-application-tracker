@@ -41,7 +41,7 @@ router.get("/failure", (req, res) => {
     });
 });
 
-router.post("/logout", (req, res, next) => {
+function logOut(req, res, next, redirectToDocumentation) {
     req.logout((error) => {
         if (error) {
             return next(error);
@@ -56,11 +56,23 @@ router.post("/logout", (req, res, next) => {
                 path: "/",
             });
 
+            if (redirectToDocumentation) {
+                return res.redirect("/api-docs");
+            }
+
             return res.status(200).json({
                 message: "Logged out successfully",
             });
         });
     });
+}
+
+router.get("/logout", (req, res, next) => {
+    logOut(req, res, next, true);
+});
+
+router.post("/logout", (req, res, next) => {
+    logOut(req, res, next, false);
 });
 
 module.exports = router;

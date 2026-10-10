@@ -38,6 +38,7 @@ app.use(
             mongoUrl: process.env.MONGODB_URI,
             dbName: process.env.DATABASE_NAME,
             collectionName: "sessions",
+            ttl: 24 * 60 * 60,
         }),
         cookie: {
             httpOnly: true,
@@ -72,6 +73,7 @@ app.get("/", (req, res) => {
         authentication: {
             authenticated: req.isAuthenticated(),
             login: "/auth/github",
+            logout: "/auth/logout",
             status: "/auth/status",
         },
     });

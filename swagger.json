@@ -13,6 +13,10 @@
     ],
     "tags": [
         {
+            "name": "Authentication",
+            "description": "GitHub OAuth login, session status, and logout"
+        },
+        {
             "name": "Companies",
             "description": "Company CRUD operations"
         },
@@ -34,6 +38,93 @@
         }
     ],
     "paths": {
+        "/auth/github": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Sign in with GitHub",
+                "description": "Open /auth/github in a browser tab to complete login. Swagger Execute cannot complete the interactive redirect flow.",
+                "operationId": "loginWithGitHub",
+                "responses": {
+                    "302": {
+                        "description": "Redirect to GitHub for authorization"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/auth/status": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Check current login session",
+                "operationId": "getAuthenticationStatus",
+                "responses": {
+                    "200": {
+                        "description": "Session status; user is returned when authenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthStatus"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Log out and destroy the session",
+                "operationId": "logout",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Log out and return to Swagger",
+                "operationId": "logoutAndRedirect",
+                "responses": {
+                    "302": {
+                        "description": "Session ended; redirect to /api-docs"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
         "/companies": {
             "get": {
                 "tags": [
@@ -66,6 +157,11 @@
                 ],
                 "summary": "Create a company",
                 "operationId": "createCompany",
+                "security": [
+                    {
+                        "sessionCookie": []
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -89,6 +185,9 @@
                     },
                     "400": {
                         "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
                     },
                     "500": {
                         "$ref": "#/components/responses/ServerError"
@@ -136,6 +235,11 @@
                 ],
                 "summary": "Update a company",
                 "operationId": "updateCompany",
+                "security": [
+                    {
+                        "sessionCookie": []
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -160,6 +264,9 @@
                     "400": {
                         "$ref": "#/components/responses/BadRequest"
                     },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
                     "404": {
                         "$ref": "#/components/responses/NotFound"
                     },
@@ -174,12 +281,20 @@
                 ],
                 "summary": "Delete a company",
                 "operationId": "deleteCompany",
+                "security": [
+                    {
+                        "sessionCookie": []
+                    }
+                ],
                 "responses": {
                     "204": {
                         "description": "Company deleted successfully"
                     },
                     "400": {
                         "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
                     },
                     "404": {
                         "$ref": "#/components/responses/NotFound"
@@ -222,6 +337,11 @@
                 ],
                 "summary": "Create a job application",
                 "operationId": "createApplication",
+                "security": [
+                    {
+                        "sessionCookie": []
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -245,6 +365,9 @@
                     },
                     "400": {
                         "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
                     },
                     "500": {
                         "$ref": "#/components/responses/ServerError"
@@ -292,6 +415,11 @@
                 ],
                 "summary": "Update a job application",
                 "operationId": "updateApplication",
+                "security": [
+                    {
+                        "sessionCookie": []
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -316,6 +444,9 @@
                     "400": {
                         "$ref": "#/components/responses/BadRequest"
                     },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
                     "404": {
                         "$ref": "#/components/responses/NotFound"
                     },
@@ -330,12 +461,20 @@
                 ],
                 "summary": "Delete a job application",
                 "operationId": "deleteApplication",
+                "security": [
+                    {
+                        "sessionCookie": []
+                    }
+                ],
                 "responses": {
                     "204": {
                         "description": "Application deleted successfully"
                     },
                     "400": {
                         "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
                     },
                     "404": {
                         "$ref": "#/components/responses/NotFound"
@@ -706,48 +845,6 @@
                 ]
             }
         },
-        "/auth/github": {
-            "get": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Sign in with GitHub",
-                "description": "Open /auth/github in a browser tab to complete login. Swagger Execute cannot complete the interactive redirect flow.",
-                "operationId": "loginWithGitHub",
-                "responses": {
-                    "302": {
-                        "description": "Redirect to GitHub for authorization"
-                    },
-                    "500": {
-                        "$ref": "#/components/responses/ServerError"
-                    }
-                }
-            }
-        },
-        "/auth/status": {
-            "get": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Check current login session",
-                "operationId": "getAuthenticationStatus",
-                "responses": {
-                    "200": {
-                        "description": "Session status; user is returned when authenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AuthStatus"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "$ref": "#/components/responses/ServerError"
-                    }
-                }
-            }
-        },
         "/auth/failure": {
             "get": {
                 "tags": [
@@ -768,39 +865,17 @@
                     }
                 }
             }
-        },
-        "/auth/logout": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Log out and destroy the session",
-                "operationId": "logout",
-                "responses": {
-                    "200": {
-                        "description": "Logged out successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Logged out successfully"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "$ref": "#/components/responses/ServerError"
-                    }
-                }
-            }
         }
     },
     "components": {
+        "securitySchemes": {
+            "sessionCookie": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "job-tracker.sid",
+                "description": "Sign in through /auth/github in this browser. The session cookie is sent automatically to same-origin requests."
+            }
+        },
         "parameters": {
             "DocumentId": {
                 "name": "id",
@@ -824,6 +899,16 @@
                     }
                 }
             },
+            "Unauthorized": {
+                "description": "An authenticated GitHub session is required",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/AuthenticationError"
+                        }
+                    }
+                }
+            },
             "NotFound": {
                 "description": "Document not found",
                 "content": {
@@ -843,19 +928,42 @@
                         }
                     }
                 }
-            },
-            "Unauthorized": {
-                "description": "An authenticated GitHub session is required",
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "$ref": "#/components/schemas/AuthenticationError"
-                        }
-                    }
-                }
             }
         },
         "schemas": {
+            "AuthStatus": {
+                "type": "object",
+                "properties": {
+                    "authenticated": {
+                        "type": "boolean"
+                    },
+                    "login": {
+                        "type": "string",
+                        "example": "/auth/github"
+                    },
+                    "user": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "username": {
+                                "type": "string"
+                            },
+                            "displayName": {
+                                "type": "string"
+                            },
+                            "profileUrl": {
+                                "type": "string"
+                            },
+                            "avatarUrl": {
+                                "type": "string",
+                                "nullable": true
+                            }
+                        }
+                    }
+                }
+            },
             "Error": {
                 "type": "object",
                 "properties": {
@@ -1206,47 +1314,6 @@
                         "example": "/auth/github"
                     }
                 }
-            },
-            "AuthStatus": {
-                "type": "object",
-                "properties": {
-                    "authenticated": {
-                        "type": "boolean"
-                    },
-                    "login": {
-                        "type": "string",
-                        "example": "/auth/github"
-                    },
-                    "user": {
-                        "type": "object",
-                        "properties": {
-                            "id": {
-                                "type": "string"
-                            },
-                            "username": {
-                                "type": "string"
-                            },
-                            "displayName": {
-                                "type": "string"
-                            },
-                            "profileUrl": {
-                                "type": "string"
-                            },
-                            "avatarUrl": {
-                                "type": "string",
-                                "nullable": true
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "securitySchemes": {
-            "sessionCookie": {
-                "type": "apiKey",
-                "in": "cookie",
-                "name": "job-tracker.sid",
-                "description": "Sign in through /auth/github in this browser. The session cookie is sent automatically to same-origin requests."
             }
         }
     }

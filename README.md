@@ -10,7 +10,7 @@ A REST API for tracking companies, job applications, professional contacts, and 
 - Validation of relationships between collections.
 - GitHub OAuth login and logout.
 - Persistent sessions stored in MongoDB.
-- Authentication required for contact and interview write operations.
+- Authentication required for write operations across all four collections.
 - Error handling, including malformed JSON requests.
 - Interactive Swagger documentation.
 - Eight unit tests covering GET controllers across all four collections.
@@ -162,6 +162,7 @@ Protected operations are marked as requiring a session cookie.
 | GET | `/auth/github/callback` | Receive GitHub's authentication response |
 | GET | `/auth/status` | Check the current login session |
 | GET | `/auth/failure` | Report failed authentication |
+| GET | `/auth/logout` | Log out and return to Swagger |
 | POST | `/auth/logout` | Log out and destroy the session |
 
 Open `/auth/github` in a browser to complete login.
@@ -189,10 +190,8 @@ For each collection:
 
 All collection GET routes are public.
 
-POST, PUT, and DELETE for contacts and interviews require
-an authenticated GitHub session. Requests without a session return 401.
-
-Company and application write routes currently remain public.
+POST, PUT, and DELETE for all four collections require an authenticated
+GitHub session. Requests without a session return 401.
 
 ## Validation
 
